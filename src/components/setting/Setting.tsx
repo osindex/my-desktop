@@ -30,7 +30,7 @@ interface OptionsProps {
 export const Setting = React.memo(() => {
   const { open, close, RenderModal } = useModal();
   const positionMap = ["left", "bottom", "right", "top"];
-  const setListMap = [{ title: "通用" }];
+  const setListMap = [{ title: "通用", icon: "icon-ios-home" },{ title: "主题", icon: "icon-theme" }];
   const [
     isSettingOpen,
     setSettingOpen,
@@ -141,7 +141,7 @@ export const Setting = React.memo(() => {
                     padding="11px 20px"
                   >
                     <Iconfont
-                      type="icon-ios-home"
+                      type={item.icon}
                       style={{
                         marginRight: "6px",
                       }}

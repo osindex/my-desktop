@@ -2,7 +2,7 @@ import React, { CSSProperties, RefObject } from "react";
 import "./index.scss";
 
 const scriptElem = document.createElement("script");
-scriptElem.src = "//at.alicdn.com/t/font_1848517_ds8sk573mfk.js";
+scriptElem.src = "//at.alicdn.com/t/font_1901382_abplhnfpsq4.js";
 document.body.appendChild(scriptElem);
 
 interface PropsTypes {

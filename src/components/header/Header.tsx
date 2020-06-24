@@ -40,7 +40,7 @@ const Header = () => {
       <div className="FinderLeft">
         <div>
           <Iconfont
-            type="icon-apple"
+            type="icon-ios-apple"
             style={{
               fontSize: 22,
             }}
