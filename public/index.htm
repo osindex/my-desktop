@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+    <head>
+        <meta charset="utf-8" />
+        <link rel="icon" href="./favicon.ico" />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="theme-color" content="#000000" />
+        <meta name="description" content="osindex,site" />
+        <!--
+      manifest.json provides metadata used when your web app is installed on a
+      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
+    -->
+        <link rel="manifest" href="./manifest.json" />
+        <!--
+      Notice the use of %PUBLIC_URL% in the tags above.
+      It will be replaced with the URL of the `public` folder during the build.
+      Only files inside the `public` folder can be referenced from the HTML.
+
+      Unlike "/favicon.ico" or "favicon.ico", "%PUBLIC_URL%/favicon.ico" will
+      work correctly both with client-side routing and a non-root public URL.
+      Learn how to configure a non-root public URL by running `npm run build`.
+    -->
+        <title>my-desktop</title>
+        <link rel="stylesheet" type="text/css" href="/assets/styles/app.css">
+        <link rel="stylesheet" type="text/css" href="/assets/styles/index.css">
+        <link rel="stylesheet" type="text/css" href="/assets/styles/apps.css">
+        <link rel="stylesheet" type="text/css" href="/assets/styles/footer.css">
+        <script type="text/javascript" src="https://at.alicdn.com/t/font_1901382_qp1wcol58w.js"></script>
+    </head>
+
+    <body>
+        <noscript>You need to enable JavaScript to run this app.</noscript>
+        <div id="app">
+            <div class="App light">
+                <header class="AppFinder">
+                    <div class="FinderLeft">
+                        <div><svg class="icon-font" aria-hidden="true" style="font-size: 22px;">
+                                <use xlink:href="#icon-osi"></use>
+                            </svg></div>
+                        <div class="pointer"><span class="text">{{myName}}</span>
+                            <ul class="menu">
+                                <li>自定义标题</li>
+                                <div class="line"></div>
+                                <li>你好</li>
+                                <div class="line"></div>
+                                <li>感谢来到这里的你</li>
+                            </ul>
+                        </div>
+                        <div class="pointer">文件</div>
+                        <div>编辑</div>
+                        <div>显示</div>
+                        <div>前往</div>
+                        <div>窗口</div>
+                        <div>帮助</div>
+                    </div>
+                    <div class="FinderRight">
+                        <div>6月30日 周二 16:04</div><a :href="github"><svg class="icon-font" aria-hidden="true" style="font-size: 22px;">
+                                <use xlink:href="#icon-ren"></use>
+                            </svg></a>
+                    </div>
+                </header>
+                <div id="main-view">
+
+                    <vue-drag-resize
+                    @resizing="resize"
+                    @dragging="resize"
+                    :is-draggable="false"
+                    :sticks="sticks"
+                    >
+                    <!-- 拖拽和编辑不可同时可用 -->
+                    <div style="z-index: 9999">
+                        <button @click="animeEx"> 触发 </button>
+
+                        <div class="blue">bbbbbb</div>
+                        <div class="green">ggggg</div>
+                    </div>
+                    <modal />
+                    </vue-drag-resize>
+                </div>
+                <footer class="left" id="AppFooter">
+                    <div id="Docker" class="left" style="width: 70px; margin-left: 0px;">
+                        <div class="DockItem left Finder"></div>
+                        <div class="DockItem left Launchpad"></div>
+                        <div class="DockItem left pointer PrefApp"></div>
+                        <div class="DockItem left pointer Chrome"></div>
+                        <div class="DockItem left Terminal"></div>
+                        <div class="DockItem left pointer Calculator"></div>
+                        <div class="DockItem left pointer Drawing"></div>
+                    </div>
+                </footer>
+            </div>
+        </div>
+    </body>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <!-- <script src="https://unpkg.com/vue"></script> -->
+    <script src="https://unpkg.com/http-vue-loader"></script>
+    <script src="/assets/js/anime.js"></script>
+    <script type="text/javascript">
+    new Vue({
+        el: '#app',
+        components: {
+            'modal': httpVueLoader('/assets/components/modal/index.vue'),
+            'vue-drag-resize': httpVueLoader('/assets/components/drag/index.vue')
+        },
+        data: {
+            myName: 'osindex',
+            github: 'https://github.com/osindex',
+            sticks: ['tr','br'],
+            animeTarget: {},
+            // tl - Top left
+            // tm - Top middle
+            // tr - Top right
+            // mr - Middle right
+            // br - Bottom right
+            // bm - Bottom middle
+            // bl - Bottom left
+            // ml - Middle left
+            body: {
+                width: 100,
+                height: 100,
+                top: 100,
+                left: 100
+            }
+        },
+        methods: {
+            resize(newRect) {
+                this.body.width = newRect.width;
+                this.body.height = newRect.height;
+                this.body.top = newRect.top;
+                this.body.left = newRect.left;
+            },
+            animeEx() {
+                console.log('Exxx')
+                anime({
+                  targets: ['.blue', '.green'],
+                  translateX: '13rem',
+                  easing: 'easeOutCirc',
+                  rotate: 180,
+                  borderRadius: 8,
+                  duration: 2000,
+                  loop: true
+                });
+            }
+        },
+        directives: {
+            // 弃用指令
+        }
+    })
+    </script>
+
+</html>
