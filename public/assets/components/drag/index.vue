@@ -2,17 +2,39 @@
 <!-- copyright@ -->
 <!-- https://github.com/kirillmurashov/vue-drag-resize -->
 <template>
-    <div class="vdr" :style="style" :class="active || isActive ? 'active' : 'inactive'" @mousedown="bodyDown($event)" @touchstart="bodyDown($event)" @touchend="up($event)">
-        <div class="toolbar" @mousedown="()=>{active = true;console.log(active)}" @touchstart="()=>{active = true}" @touchend="()=>{active = isActive}">
-            <button>控制</button>
+    <div class="vdr" :style="style" :class="active || isActive ? 'active' : 'inactive'">
+        <slot name="header"> 
+            <div class="toolbar" @mousedown="bodyDown($event)" @touchstart="bodyDown($event)" @touchend="up($event)">
+                <div class="control">
+                    <div class="control-left" @mouseenter="showIcon" @mouseleave="hideIcon">
+                        <a class="toolbar-icon icon-close" @click="closeThis">
+                            <svg v-if="showIconBar" class="icon-font" aria-hidden="true" style="font-size: 0.65rem;">
+                                <use xlink:href="#icon-close"></use>
+                            </svg>
+                        </a>
+                        <a class="toolbar-icon icon-sub" @click="show('sub')">
+                            <svg v-if="showIconBar" class="icon-font" aria-hidden="true" style="font-size: 0.65rem;">
+                                <use xlink:href="#icon-sub"></use>
+                            </svg>
+                        </a>
+                        <a class="toolbar-icon icon-resize" @click="show('resize')">
+                            <svg v-if="showIconBar" class="icon-font" aria-hidden="true" style="font-size: 0.65rem;">
+                                <use xlink:href="#icon-resize"></use>
+                            </svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </slot>
+        <div class="content" :style="{padding: padding + 'rem'}">
+            <slot></slot>            
         </div>
-        <slot></slot>
         <div v-for="stick in sticks" class="vdr-stick" :class="['vdr-stick-' + stick, isResizable ? '' : 'not-resizable',showStick ? 'vdr-stick-show' : '']" @mousedown.stop.prevent="stickDown(stick, $event)" @touchstart.stop.prevent="stickDown(stick, $event)" :style="vdrStick(stick)">
         </div>
     </div>
 </template>
 <script type="text/javascript">
-const stickSize = 8;
+const stickSize = 16;
 const styleMapping = {
     y: {
         t: 'top',
@@ -99,14 +121,14 @@ module.exports = {
         },
         w: {
             type: Number,
-            default: 200,
+            default: 600,
             validator: function (val) {
                 return val > 0
             }
         },
         h: {
             type: Number,
-            default: 200,
+            default: 400,
             validator: function (val) {
                 return val > 0
             }
@@ -162,7 +184,8 @@ module.exports = {
         sticks: {
             type: Array,
             default: function () {
-                return ['tl', 'tm', 'tr', 'mr', 'br', 'bm', 'bl', 'ml']
+                return ['tr', 'br'] // 修改默认值
+                // return ['tl', 'tm', 'tr', 'mr', 'br', 'bm', 'bl', 'ml']
             }
         },
         axis: {
@@ -170,6 +193,13 @@ module.exports = {
             default: 'both',
             validator: function (val) {
                 return ['x', 'y', 'both', 'none'].indexOf(val) !== -1
+            }
+        },
+        padding: {
+            type: Number,
+            default: 1,
+            validator: function (val) {
+                return typeof val === 'number'
             }
         }
     },
@@ -192,7 +222,8 @@ module.exports = {
             right: null,
             bottom: null,
             minWidth: this.minw,
-            minHeight: this.minh
+            minHeight: this.minh,
+            showIconBar: false,
         }
     },
 
@@ -261,6 +292,24 @@ module.exports = {
     },
 
     methods: {
+        show(i) {
+            console.log(i)
+        },
+        showIcon() {
+            this.showIconBar = true
+        },
+        hideIcon() {
+            this.showIconBar = false
+        },
+        closeThis() {
+            this.$emit('close')
+        },
+        hideThis() {
+            this.$emit('hide')
+        },
+        resizeThis() {
+            // this.$emit('resize')
+        },
         deselect() {
             if (this.preventActiveBehavior) {
                 return
@@ -929,9 +978,16 @@ module.exports = {
 }
 </script>
 <style type="text/css" scoped>
+/*
+控制基础色
+#f0f0f0
+控制焦点色
+#bfbfbf
+*/
 .vdr {
     position: absolute;
     box-sizing: border-box;
+    box-shadow: -3px 5px 12px 0px #101010;
 }
 
 .vdr.active:before {
@@ -946,6 +1002,83 @@ module.exports = {
     /*outline: 1px dashed #d6d6d6;*/
 }
 
+.toolbar {
+    width: 100%;
+    display: block;
+}
+.control {
+    user-select: none;
+    -webkit-app-region: drag;
+    cursor: default;
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    min-height: 3rem;
+    background-image: linear-gradient(to top,
+        #fafafa 0px,
+        #f6f6f6 2px,
+        #f6f6f6 100%);
+    border-bottom: 1px solid #d1d1d1;
+    border-top: 1px solid #f6f6f6;
+    border-top-left-radius: 0.3rem;
+    border-top-right-radius: 0.3rem;
+    padding: 11px 8px;
+}
+.vdr.active .control {
+    background-image: linear-gradient(to top,
+        #ededed 0px,
+        #ededed 1px,
+        #e7e7e7 2px,
+        #d1d1d1 100%);
+    border-bottom: 1px solid #afafaf;
+}
+.control-left {
+    display: flex;
+    position: absolute;
+}
+.toolbar-icon {
+    user-select: none;
+    -webkit-app-region: no-drag;
+    cursor: default;
+    box-sizing: border-box;
+    width: 12px;
+    height: 12px;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 50%;
+    margin-top: 1px;
+    margin-left: 5px;
+    margin-right: 4px;
+    line-height: 0;
+    background-color: #dddddd;
+    border-color: #d0d0d0;
+}
+.icon-close {
+    background: #ff5f57;
+}
+.icon-sub {
+    background: #ffbd2e;
+}
+.icon-resize {
+    background: #28c940;
+}
+.vdr.active .icon-close {
+    border-color: #e2463f;
+}
+.vdr.active .icon-sub {
+    border-color: #e1a116;
+}
+.vdr.active .icon-resize {
+    border-color: #12ac28;
+}
+.content {
+    background: #fff;
+    height: calc(100% - 3rem);
+    border-bottom-left-radius: 0.3rem;
+    border-bottom-right-radius: 0.3rem;
+
+}
 .vdr-stick {
     box-sizing: border-box;
     position: absolute;

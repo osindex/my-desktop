@@ -26,7 +26,7 @@
         <link rel="stylesheet" type="text/css" href="/assets/styles/index.css">
         <link rel="stylesheet" type="text/css" href="/assets/styles/apps.css">
         <link rel="stylesheet" type="text/css" href="/assets/styles/footer.css">
-        <script type="text/javascript" src="https://at.alicdn.com/t/font_1901382_qp1wcol58w.js"></script>
+        <script type="text/javascript" src="https://at.alicdn.com/t/font_1901382_1ae31dx9es1.js"></script>
     </head>
 
     <body>
@@ -48,42 +48,42 @@
                             </ul>
                         </div>
                         <div class="pointer">文件</div>
-                        <div>编辑</div>
-                        <div>显示</div>
-                        <div>前往</div>
-                        <div>窗口</div>
-                        <div>帮助</div>
+                        <div class="pointer">编辑</div>
+                        <div class="pointer">显示</div>
+                        <div class="pointer">前往</div>
+                        <div class="pointer">窗口</div>
+                        <div class="pointer" @click="showHelp">帮助</div>
                     </div>
                     <div class="FinderRight">
-                        <div>6月30日 周二 16:04</div><a :href="github"><svg class="icon-font" aria-hidden="true" style="font-size: 22px;">
+                        <div>{{now}}</div><a :href="github"><svg class="icon-font" aria-hidden="true" style="font-size: 22px;">
                                 <use xlink:href="#icon-ren"></use>
                             </svg></a>
                     </div>
                 </header>
                 <div id="main-view">
-
                     <vue-drag-resize
+                    v-for="(dom, index) in doms"
+                    :key="index"
+                    v-bind="dom"
                     @resizing="resize"
                     @dragging="resize"
-                    :is-draggable="false"
-                    :sticks="sticks"
+                    @close="removeDom(index)"
+                    :ref="dom.key || null"
                     >
-                    <!-- 拖拽和编辑不可同时可用 -->
-                    <div style="z-index: 9999">
-                        <button @click="animeEx"> 触发 </button>
-
-                        <div class="blue">bbbbbb</div>
-                        <div class="green">ggggg</div>
-                    </div>
-                    <modal />
+                        <iframe v-if="dom.type === 'url'" :src="dom.url" style="width: 100%;height: 100%;border: 0;">
+                        </iframe>
+                        <component v-if="dom.component" v-bind="dom.bind" :is="dom.component">
+                            <div v-html="dom.html"></div>
+                        </component>
+                        <div v-else v-html="dom.html"></div>
                     </vue-drag-resize>
                 </div>
                 <footer class="left" id="AppFooter">
                     <div id="Docker" class="left" style="width: 70px; margin-left: 0px;">
                         <div class="DockItem left Finder"></div>
                         <div class="DockItem left Launchpad"></div>
-                        <div class="DockItem left pointer PrefApp"></div>
-                        <div class="DockItem left pointer Chrome"></div>
+                        <div class="DockItem left pointer PrefApp" @click="iframe()"></div>
+                        <div class="DockItem left pointer Chrome" @click="browser()"></div>
                         <div class="DockItem left Terminal"></div>
                         <div class="DockItem left pointer Calculator"></div>
                         <div class="DockItem left pointer Drawing"></div>
@@ -95,18 +95,36 @@
     <script src="https://cdn.jsdelivr.net/npm/vue"></script>
     <!-- <script src="https://unpkg.com/vue"></script> -->
     <script src="https://unpkg.com/http-vue-loader"></script>
+    <script src="https://unpkg.com/dayjs"></script>
+    <script src="https://unpkg.com/dayjs@1.8.21/locale/zh-cn.js"></script>
     <script src="/assets/js/anime.js"></script>
     <script type="text/javascript">
+    dayjs.locale('zh-cn')
+    // Vue.component()
     new Vue({
         el: '#app',
         components: {
             'modal': httpVueLoader('/assets/components/modal/index.vue'),
-            'vue-drag-resize': httpVueLoader('/assets/components/drag/index.vue')
+            'vue-drag-resize': httpVueLoader('/assets/components/drag/index.vue'),
+            'osi-svg': httpVueLoader('/assets/components/svg/osi.vue'),
+            'anchored-heading': {
+              render: function (createElement) {
+                return createElement(
+                  'h' + this.level,   // 标签名称
+                  this.$slots.default // 子节点数组
+                )
+              },
+              props: {
+                level: {
+                  type: Number,
+                  required: true
+                }
+              }
+            }
         },
         data: {
             myName: 'osindex',
             github: 'https://github.com/osindex',
-            sticks: ['tr','br'],
             animeTarget: {},
             // tl - Top left
             // tm - Top middle
@@ -121,7 +139,12 @@
                 height: 100,
                 top: 100,
                 left: 100
-            }
+            },
+            currentDate: dayjs(),
+            doms: [],
+            iframeActive: false,
+            iframeUrl: null,
+            isBrowser: null
         },
         methods: {
             resize(newRect) {
@@ -141,10 +164,78 @@
                   duration: 2000,
                   loop: true
                 });
+            },
+            iframe(url = "http://www.baidu.com/") {
+                this.iframeUrl = url
+                this.iframeActive = true
+            },
+            browser(url = "http://www.baidu.com/") {
+                // 外部浏览器
+                if (!this.isBrowser) {
+                    this.isBrowser = window.open(
+                        url,
+                        "",
+                        "width=1000,height=600,left=500,top=300,menubar=no,toolbar=no,status=no,scrollbars=yes"
+                      )
+                } else {
+                  this.isBrowser.close()
+                  this.isBrowser = null
+                }
+            },
+            removeDom(index) {
+                this.doms.splice(index, 1)
+            },
+            shake(el) {
+                anime({
+                    targets: el,
+                    scale: 1,
+                    rotate: [
+                        {
+                            value: -5,
+                            duration: 50,
+                            easing: 'easeInOutBounce'
+                        },
+                        {
+                            value: 5,
+                            duration: 50,
+                            easing: 'easeInOutBounce'
+                        },
+                        {
+                            value: 0,
+                            duration: 25,
+                            easing: 'easeInOutBounce'
+                        }
+                    ],
+                    // loop: 2, //间隔时间太长 
+                    // loopComplete: function(anim) {
+                    //     console.log(anim)
+                    //     // anime.remove(el) 移除无效
+                    // }
+                });
+            },
+            showHelp() {
+                const e = this.doms.find(e=>e.key === 'help')
+                    console.log(this.$refs)
+                if(e){
+                    this.shake(this.$refs[e.key][0].$el)
+                }else{
+                    this.doms.push({key:'help', padding: 1, component:'osi-svg',html:`<p>YoungFan</p><p>copyright@2020</p>`,w: 600, h: 400})
+                    // this.doms.push({key:'help',padding: 1,html:'<h2>内容呢？</h2><p>一段话</p>'})
+                }
+            }
+        },
+        computed: {
+            now() {
+                return this.currentDate.format('M月DD日 ddd HH:mm')
             }
         },
         directives: {
             // 弃用指令
+        },
+        mounted() {
+            window.setInterval(() => {
+              this.currentDate = this.currentDate.add(1, 's')
+            }, 1000)
         }
     })
     </script>
