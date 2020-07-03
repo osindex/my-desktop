@@ -119,6 +119,7 @@
 }
 
 #AppFooter {
+  z-index: 1000;
   position: absolute;
   display: flex;
   @each $member in top, bottom {

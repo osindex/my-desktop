@@ -23,6 +23,12 @@ body {
     cursor: pointer !important;
   }
 }
+.show {
+  display: block;
+}
+[v-cloak], .hide {
+  display: none;
+}
 
 @media (prefers-color-scheme: dark) {
   body {

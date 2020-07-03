@@ -38,6 +38,7 @@
   background-color: rgba(222, 223, 227, 0.6);
   box-shadow: rgba(0, 0, 0, 0.31) 0px 0px 1px, rgba(0, 0, 0, 0.18) 0px 0px 5px,
     rgba(0, 0, 0, 0.3) 0px 8px 50px;
+  transition: opacity 0.6s 0.2s;
   .FinderLeft,
   .FinderRight {
     display: flex;

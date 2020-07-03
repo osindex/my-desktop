@@ -14,7 +14,7 @@ module.exports = {
 		// 	direction: 'alternate',
 		// 	loop: true
 	 //    });
-		 var path = anime.path('path');
+		 var path = anime.path('#osi-svg path');
 
 		 anime({
 		   targets: '.point',
@@ -27,7 +27,7 @@ module.exports = {
 		 });
 
 		 anime({
-		   targets: 'path',
+		   targets: '#osi-svg path',
 		   opacity: 0,
 		   duration: 6000,
 		   loop: true,

@@ -32,13 +32,15 @@
     <body>
         <noscript>You need to enable JavaScript to run this app.</noscript>
         <div id="app">
-            <div class="App light">
-                <header class="AppFinder">
+            <div class="App" v-cstyle style="background: url(/assets/image/default.jpg) center/cover no-repeat;" :class="[theme]">
+                <v-mask v-model="overMask"> </v-mask>
+                <header class="AppFinder" :style="{opacity: overMask?'0':'1'}">
                     <div class="FinderLeft">
                         <div><svg class="icon-font" aria-hidden="true" style="font-size: 22px;">
                                 <use xlink:href="#icon-osi"></use>
                             </svg></div>
-                        <div class="pointer"><span class="text">{{myName}}</span>
+                        <div class="pointer">
+                            <span class="text " v-cloak>{{myName}}</span>
                             <ul class="menu">
                                 <li>自定义标题</li>
                                 <div class="line"></div>
@@ -55,12 +57,12 @@
                         <div class="pointer" @click="showHelp">帮助</div>
                     </div>
                     <div class="FinderRight">
-                        <div>{{now}}</div><a :href="github"><svg class="icon-font" aria-hidden="true" style="font-size: 22px;">
+                        <div v-cloak>{{now}}</div><a :href="github"><svg class="icon-font" aria-hidden="true" style="font-size: 22px;">
                                 <use xlink:href="#icon-ren"></use>
                             </svg></a>
                     </div>
                 </header>
-                <div id="main-view">
+                <div id="main-view" v-if="loaded" v-cloak>
                     <vue-drag-resize
                     v-for="(dom, index) in doms"
                     :key="index"
@@ -81,12 +83,12 @@
                     <modal name="vmd">
                         2333
                     </modal>
-                    
                 </div>
                 <footer class="left" id="AppFooter">
                     <div id="Docker" class="left" style="width: 70px; margin-left: 0px;">
                         <div class="DockItem left Finder"></div>
-                        <div class="DockItem left Launchpad" @click="openApp('game-puzzle')"></div>
+                        <div class="DockItem left Launchpad" @click="openApps"></div>
+                        <!-- openApp('game-puzzle', {bind: {src: 'http://localhost:10241/assets/image/light.jpg'}}) -->
                         <div class="DockItem left pointer PrefApp" @click="iframe()"></div>
                         <div class="DockItem left pointer Chrome" @click="browser()"></div>
                         <div class="DockItem left Terminal"></div>
@@ -97,7 +99,12 @@
             </div>
         </div>
     </body>
-    <!-- <script src="https://cdn.jsdelivr.net/npm/vue"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="https://cdn.jsdelivr.net/npm/http-vue-loader"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dayjs/locale/zh-cn.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-js-modal"></script> -->
+
     <script src="https://unpkg.com/vue"></script>
     <script src="https://unpkg.com/http-vue-loader"></script>
     <script src="https://unpkg.com/dayjs"></script>
@@ -114,6 +121,7 @@
             'v-modal': httpVueLoader('/assets/components/modal/index.vue'),
             'vue-drag-resize': httpVueLoader('/assets/components/drag/index.vue'),
             'osi-svg': httpVueLoader('/assets/components/svg/osi.vue'),
+            'v-mask': httpVueLoader('/assets/components/mask/index.vue'),
             'game-puzzle': httpVueLoader('/assets/components/games/puzzle.vue'),
             'anchored-heading': {
               render: function (createElement) {
@@ -130,29 +138,35 @@
               }
             }
         },
-        data: {
-            myName: 'osindex',
-            github: 'https://github.com/osindex',
-            animeTarget: {},
-            // tl - Top left
-            // tm - Top middle
-            // tr - Top right
-            // mr - Middle right
-            // br - Bottom right
-            // bm - Bottom middle
-            // bl - Bottom left
-            // ml - Middle left
-            body: {
-                width: 100,
-                height: 100,
-                top: 100,
-                left: 100
-            },
-            currentDate: dayjs(),
-            doms: [],
-            iframeActive: false,
-            iframeUrl: null,
-            isBrowser: null
+        data() {
+            return {
+                myName: 'osindex',
+                github: 'https://github.com/osindex',
+                loaded: false,
+                overMask: false,
+                theme: 'light',
+                animeTarget: {},
+                // tl - Top left
+                // tm - Top middle
+                // tr - Top right
+                // mr - Middle right
+                // br - Bottom right
+                // bm - Bottom middle
+                // bl - Bottom left
+                // ml - Middle left
+                body: {
+                    width: 100,
+                    height: 100,
+                    top: 100,
+                    left: 100
+                },
+                currentDate: dayjs(),
+                doms: [],
+                iframeActive: false,
+                iframeUrl: null,
+                isBrowser: null,
+                'game-puzzle': false
+            }
         },
         methods: {
             loadScript(src) {
@@ -239,8 +253,22 @@
                     // this.doms.push({key:'help',padding: 1,html:'<h2>内容呢？</h2><p>一段话</p>'})
                 }
             },
-            openApp(name) {
-                this.doms.push({key:'game-puzzle', padding: 1, component:'game-puzzle',w: 600, h: 400,bind: {src: 'http://localhost:10241/assets/image/light.jpg'} })
+            openApp(name, exts = {}) {
+                // {key:'game-puzzle', padding: 1, component:'game-puzzle',w: 600, h: 400,bind: {src: 'http://localhost:10241/assets/image/light.jpg'} }
+                if (this[name]) {
+                    this.doms.push({key: name,w: 600, h: 400, padding: 1, ...exts })
+                }
+            },
+            openApps() {
+                this.overMask = true
+                console.log(this.overMask)
+                // const e = this.doms.find(e=>e.key === 'apps')
+                // if(e){
+                //     this.shake(this.$refs[e.key][0].$el)
+                // }else{
+                //     this.doms.push({key:'apps', padding: 1, component:'osi-svg',html:`<p>YoungFan</p><p>copyright@2020</p>`,w: 600, h: 400})
+                //     // this.doms.push({key:'help',padding: 1,html:'<h2>内容呢？</h2><p>一段话</p>'})
+                // }
             },
             beforeClose(event) {
                 console.log(event.params);
@@ -248,13 +276,23 @@
         },
         computed: {
             now() {
-                return this.currentDate.format('M月DD日 ddd HH:mm')
+                return this.currentDate.format('M月D日 ddd HH:mm')
             }
         },
         directives: {
-            // 弃用指令
+            // v-cloak 也需要vue 加载完 使用[css]和指令隐藏特性即可
+            cstyle: {
+                inserted: (el) => {
+                    el.removeAttribute('style')
+                }
+            }
+        },
+        created() {
+            const hour = (new Date()).getHours()
+            this.theme = hour > 7 && hour < 18 ? 'light' : 'dark'
         },
         mounted() {
+            this.loaded = true
             // this.$refs['vmd'].show()
             // this.$nextTick(()=>{
             //     this.$modal.show('vmd', { draggable: true, foo: 'bar' })
@@ -281,8 +319,11 @@
             window.setInterval(() => {
               this.currentDate = this.currentDate.add(1, 's')
             }, 1000)
-            this.loadScript('https://unpkg.com/vue-8-puzzle') // 延迟加载
-            // 加载完毕才能点击某些按钮
+            const puzzle = this.loadScript('https://cdn.jsdelivr.net/npm/vue-8-puzzle') // 延迟加载
+            // const puzzle = this.loadScript('https://unpkg.com/vue-8-puzzle') // 延迟加载
+            puzzle.onload = () => {
+                 this['game-puzzle'] = true
+            }
         }
     })
     </script>
