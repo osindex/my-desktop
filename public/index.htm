@@ -77,11 +77,16 @@
                         </component>
                         <div v-else v-html="dom.html"></div>
                     </vue-drag-resize>
+
+                    <modal name="vmd">
+                        2333
+                    </modal>
+                    
                 </div>
                 <footer class="left" id="AppFooter">
                     <div id="Docker" class="left" style="width: 70px; margin-left: 0px;">
                         <div class="DockItem left Finder"></div>
-                        <div class="DockItem left Launchpad"></div>
+                        <div class="DockItem left Launchpad" @click="openApp('game-puzzle')"></div>
                         <div class="DockItem left pointer PrefApp" @click="iframe()"></div>
                         <div class="DockItem left pointer Chrome" @click="browser()"></div>
                         <div class="DockItem left Terminal"></div>
@@ -92,21 +97,24 @@
             </div>
         </div>
     </body>
-    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
-    <!-- <script src="https://unpkg.com/vue"></script> -->
+    <!-- <script src="https://cdn.jsdelivr.net/npm/vue"></script> -->
+    <script src="https://unpkg.com/vue"></script>
     <script src="https://unpkg.com/http-vue-loader"></script>
     <script src="https://unpkg.com/dayjs"></script>
-    <script src="https://unpkg.com/dayjs@1.8.21/locale/zh-cn.js"></script>
+    <script src="https://unpkg.com/dayjs/locale/zh-cn.js"></script>
+    <script src="https://unpkg.com/vue-js-modal"></script>
     <script src="/assets/js/anime.js"></script>
     <script type="text/javascript">
     dayjs.locale('zh-cn')
-    // Vue.component()
+    Vue.use(window["vue-js-modal"].default)
+    // Vue.use(window["vue-js-modal"].default, { dialog: true })
     new Vue({
         el: '#app',
         components: {
-            'modal': httpVueLoader('/assets/components/modal/index.vue'),
+            'v-modal': httpVueLoader('/assets/components/modal/index.vue'),
             'vue-drag-resize': httpVueLoader('/assets/components/drag/index.vue'),
             'osi-svg': httpVueLoader('/assets/components/svg/osi.vue'),
+            'game-puzzle': httpVueLoader('/assets/components/games/puzzle.vue'),
             'anchored-heading': {
               render: function (createElement) {
                 return createElement(
@@ -147,6 +155,15 @@
             isBrowser: null
         },
         methods: {
+            loadScript(src) {
+                let scriptEle = document.createElement('script')
+                scriptEle.src = src
+                document.body.appendChild(scriptEle)
+                // scriptEle.onload = () => {
+                //  this.load = true
+                // }
+                return scriptEle
+            },
             resize(newRect) {
                 this.body.width = newRect.width;
                 this.body.height = newRect.height;
@@ -215,13 +232,18 @@
             },
             showHelp() {
                 const e = this.doms.find(e=>e.key === 'help')
-                    console.log(this.$refs)
                 if(e){
                     this.shake(this.$refs[e.key][0].$el)
                 }else{
                     this.doms.push({key:'help', padding: 1, component:'osi-svg',html:`<p>YoungFan</p><p>copyright@2020</p>`,w: 600, h: 400})
                     // this.doms.push({key:'help',padding: 1,html:'<h2>内容呢？</h2><p>一段话</p>'})
                 }
+            },
+            openApp(name) {
+                this.doms.push({key:'game-puzzle', padding: 1, component:'game-puzzle',w: 600, h: 400,bind: {src: 'http://localhost:10241/assets/image/light.jpg'} })
+            },
+            beforeClose(event) {
+                console.log(event.params);
             }
         },
         computed: {
@@ -233,9 +255,34 @@
             // 弃用指令
         },
         mounted() {
+            // this.$refs['vmd'].show()
+            // this.$nextTick(()=>{
+            //     this.$modal.show('vmd', { draggable: true, foo: 'bar' })
+            //     // this.$refs['vmd'].show()
+            // })
+            // this.$modal.show('dialog', {
+            //   title: 'Alert!',
+            //   text: 'You are too awesome',
+            //   buttons: [
+            //     {
+            //       title: 'Deal with it',
+            //       handler: () => { alert('Woot!') }
+            //     },
+            //     {
+            //       title: '',       // Button title
+            //       default: true,    // Will be triggered by default if 'Enter' pressed.
+            //       handler: () => {} // Button click handler
+            //     },
+            //     {
+            //       title: 'Close'
+            //     }
+            //  ]
+            // })
             window.setInterval(() => {
               this.currentDate = this.currentDate.add(1, 's')
             }, 1000)
+            this.loadScript('https://unpkg.com/vue-8-puzzle') // 延迟加载
+            // 加载完毕才能点击某些按钮
         }
     })
     </script>
