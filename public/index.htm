@@ -32,7 +32,7 @@
     <body>
         <noscript>You need to enable JavaScript to run this app.</noscript>
         <div id="app">
-            <div class="App" v-cstyle style="background: url(/assets/image/default.jpg) center/cover no-repeat;" :class="[theme]">
+            <div class="App" v-style style="background: url(/assets/image/default.jpg) center/cover no-repeat;" :class="[theme]">
                 <v-mask v-model="overMask"> </v-mask>
                 <header class="AppFinder" :style="{opacity: overMask?'0':'1'}">
                     <div class="FinderLeft">
@@ -84,32 +84,38 @@
                         2333
                     </modal>
                 </div>
-                <footer class="left" id="AppFooter">
-                    <div id="Docker" class="left" style="width: 70px; margin-left: 0px;">
-                        <div class="DockItem left Finder"></div>
-                        <div class="DockItem left Launchpad" @click="openApps"></div>
+                <footer :class="[dockPosition]" id="AppFooter">
+                    <div id="Docker" class="left" >
+                        <!-- style="width: 70px; margin-left: 0px;" -->
+                        <div class="DockItem Finder" :class="[dockPosition]"></div>
+                        <div :class="[dockPosition]" class="DockItem Launchpad" @click="openApps"></div>
                         <!-- openApp('game-puzzle', {bind: {src: 'http://localhost:10241/assets/image/light.jpg'}}) -->
-                        <div class="DockItem left pointer PrefApp" @click="iframe()"></div>
-                        <div class="DockItem left pointer Chrome" @click="browser()"></div>
-                        <div class="DockItem left Terminal"></div>
-                        <div class="DockItem left pointer Calculator"></div>
-                        <div class="DockItem left pointer Drawing"></div>
+                        <div :class="[dockPosition]" class="DockItem pointer PrefApp" @click="openSetting"></div>
+                        <div :class="[dockPosition]" class="DockItem pointer Chrome" @click="browser()"></div>
+                        <div :class="[dockPosition]" class="DockItem Terminal"></div>
+                        <div :class="[dockPosition]" class="DockItem pointer Calculator"></div>
+                        <div :class="[dockPosition]" class="DockItem pointer Drawing"></div>
                     </div>
                 </footer>
             </div>
         </div>
     </body>
-    <!-- <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue-cookies"></script>
     <script src="https://cdn.jsdelivr.net/npm/http-vue-loader"></script>
     <script src="https://cdn.jsdelivr.net/npm/dayjs"></script>
     <script src="https://cdn.jsdelivr.net/npm/dayjs/locale/zh-cn.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/vue-js-modal"></script> -->
+    <script src="https://cdn.jsdelivr.net/npm/vue-js-modal"></script>
 
+    <!-- 
     <script src="https://unpkg.com/vue"></script>
+    <script src="https://unpkg.com/vue-cookies"></script>
     <script src="https://unpkg.com/http-vue-loader"></script>
     <script src="https://unpkg.com/dayjs"></script>
     <script src="https://unpkg.com/dayjs/locale/zh-cn.js"></script>
-    <script src="https://unpkg.com/vue-js-modal"></script>
+    <script src="https://unpkg.com/vue-js-modal"></script> -->
+
+
     <script src="/assets/js/anime.js"></script>
     <script type="text/javascript">
     dayjs.locale('zh-cn')
@@ -144,6 +150,7 @@
                 github: 'https://github.com/osindex',
                 loaded: false,
                 overMask: false,
+                dockPosition: window.$cookies.get("dockPosition"),
                 theme: 'light',
                 animeTarget: {},
                 // tl - Top left
@@ -244,20 +251,58 @@
                     // }
                 });
             },
-            showHelp() {
-                const e = this.doms.find(e=>e.key === 'help')
-                if(e){
-                    this.shake(this.$refs[e.key][0].$el)
-                }else{
-                    this.doms.push({key:'help', padding: 1, component:'osi-svg',html:`<p>YoungFan</p><p>copyright@2020</p>`,w: 600, h: 400})
-                    // this.doms.push({key:'help',padding: 1,html:'<h2>内容呢？</h2><p>一段话</p>'})
-                }
+            uniApp(name) {
+                return this.doms.find(e=>e.key === name)
             },
             openApp(name, exts = {}) {
                 // {key:'game-puzzle', padding: 1, component:'game-puzzle',w: 600, h: 400,bind: {src: 'http://localhost:10241/assets/image/light.jpg'} }
-                if (this[name]) {
-                    this.doms.push({key: name,w: 600, h: 400, padding: 1, ...exts })
+                const e = this.uniApp(name)
+                if(e){
+                    this.shake(this.$refs[e.key][0].$el)
+                }else{
+                    this.doms.push({key: name, w: 600, h: 400, padding: 1, ...exts })
                 }
+            },
+            showHelp() {
+                this.openApp('help', {component:'osi-svg',html:`<p>YoungFan</p><p>copyright@2020</p>`})
+            },
+            openSetting() {
+                const exts = {
+                    padding: 0,
+                    html: `
+<div class="mainSet">
+    <div class="leftSet">
+        <div class="leftTitle">
+            <!-- <svg class="icon-font" aria-hidden="true" style="font-size: 22px;">
+                    <use xlink:href="#icon-setting"></use>
+                </svg>
+            -->
+            <span>
+                通用
+            </span>
+        </div>
+    </div>
+    <div class="rightSet">
+        <span class="rightTitle">
+          设置
+        </span>
+        <div class="divide"></div>
+        <div class="options">
+            <checkbox>大</checkbox>
+            <checkbox>小</checkbox>
+            <span>图标缩放后大小</span>
+        </div>
+        div class="options">
+            <radio>左</radio>
+            <radio>下</radio>
+            <radio>右</radio>
+            <span>Dock 所在屏幕位置</span>
+        </div>
+    </div>
+</div>
+                    `
+                }
+                this.openApp('setting', exts)
             },
             openApps() {
                 this.overMask = true
@@ -281,7 +326,7 @@
         },
         directives: {
             // v-cloak 也需要vue 加载完 使用[css]和指令隐藏特性即可
-            cstyle: {
+            style: {
                 inserted: (el) => {
                     el.removeAttribute('style')
                 }
@@ -290,6 +335,7 @@
         created() {
             const hour = (new Date()).getHours()
             this.theme = hour > 7 && hour < 18 ? 'light' : 'dark'
+            // window.$cookies.set("dockPosition","left",-1); 
         },
         mounted() {
             this.loaded = true
