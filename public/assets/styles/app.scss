@@ -105,79 +105,28 @@
   }
 }
 
-.mainSet {
-    display: flex;
-    .leftSet {
-      width: 172px;
-      background-color: #f0f0f0;
-      border-bottom-left-radius: 5px;
-      .leftTitle {
-        &.active {
-          background: #bfbfbf;
-        }
-        padding: 11px 20px;
-        span{
-          color: #414141;
-          font-size: 14px;
-          font-weight: bold;
-        }
-      }
-      div {
-        overflow: inherit !important;
-        ul {
-          li {
-            margin: 0 !important;
-          }
-        }
-      }
-    }
-    .rightSet {
-      overflow: auto;
-      border-bottom-right-radius: 5px;
-      flex-direction: column;
-      padding: 30px 60px;
-      width: 512px;
-      height: 380px;
-      background-color: #ffffff;
-      .rightTitle {
-        margin-bottom: 10px;
-        font-size: 20px;
-        font-weight: bold;
-      }
-      .divide {
-        width: 100%;
-        border-top: 1px solid #f0f0f0;
-        margin-bottom: 10px;
-      }
-      .options {
-        label {
-          font-weight: bold;
-          line-height: 16px;
-        }
-        input[type="range"] {
-          margin: 0 30px 20px 0;
-          width: 256px;
-          -webkit-appearance: none;
-          &:focus {
-            outline: none;
-          }
-          &::-webkit-slider-runnable-track {
-            height: 4px;
-            background-color: #d9d9d9;
-          }
-          &::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            height: 18px;
-            width: 18px;
-            margin-top: -8px; /*使滑块超出轨道部分的偏移量相等*/
-            background: #ffffff;
-            border-radius: 3px;
-            border: 0.6px solid #d9d9d9;
-            position: relative;
-          }
-        }
-      }
-    }
+button:active,
+  .button:active,
+  select:active  {
+    background: linear-gradient(bottom, #d2d2d2, #c5c5c5);
+    box-shadow:
+      inset 0px 2px 2px 0px rgba(0,0,0,.17),
+            0px 1px 0px 0px rgba(255,255,255,.45);
+    border-color: rgba(0,0,0,.55) rgba(0,0,0,.41) rgba(0,0,0,.28) rgba(0,0,0,.41);
+  }
+  select {
+    -webkit-appearance: none;
+    border-radius: 50px;
+    background-color: #ededed;
+    background: url(../image/dropdown-updown.png) right center no-repeat, -webkit-linear-gradient(top, #f6f6f6, #e0e0e0);
+    border: 1px solid rgba(0,0,0,.4);
+    background-clip: border-box;
+    box-shadow: 0px 1px 0px 0px rgba(255,255,255,.45);
+    display: inline-block;
+    line-height: inherit;
+    font-size: inherit;
+    padding: 0 16px 0 8px;
+    text-align: center;
   }
 
 .light {

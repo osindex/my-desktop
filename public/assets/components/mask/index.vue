@@ -119,6 +119,6 @@ nav {
     left: 0; right: 0;
     filter: blur(20px);
     z-index: -1;
-    margin: 30px;
+    /*margin: 30px;*/
 }
 </style>

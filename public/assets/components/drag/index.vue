@@ -23,6 +23,9 @@
                             </svg>
                         </a>
                     </div>
+                    <div class="control-right">
+                        {{showTitle}}
+                    </div>
                 </div>
             </div>
         </slot>
@@ -51,6 +54,10 @@ const styleMapping = {
 module.exports = {
     name: 'vue-drag-resize',
     props: {
+        title: {
+            type: String,
+            default: null
+        },
         parentScaleX: {
             type: Number,
             default: 1,
@@ -206,6 +213,7 @@ module.exports = {
 
     data: function () {
         return {
+            showTitle: this.title,
             active: this.isActive,
             rawWidth: this.w,
             rawHeight: this.h,
@@ -292,6 +300,9 @@ module.exports = {
     },
 
     methods: {
+        setTitle(t) {
+            this.showTitle = t
+        },
         show(i) {
             console.log(i)
         },
@@ -1036,6 +1047,15 @@ module.exports = {
 .control-left {
     display: flex;
     position: absolute;
+}
+.control-right {
+    display: flex;
+    width: 100%;
+    justify-content: center;
+    font-size: .75em;
+    font-weight: 600;
+    color: #1b1b1b;
+    letter-spacing: 2px;
 }
 .toolbar-icon {
     user-select: none;
