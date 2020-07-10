@@ -192,6 +192,7 @@
           content: "●";
           font-size: 0.1em;
           position: absolute;
+          color: #ffffff55;
         }
       }
       &.top {
@@ -214,7 +215,7 @@
         }
         &.active {
           &::after {
-            bottom: -7px;
+            bottom: -6px;
           }
         }
       }

@@ -26,7 +26,7 @@
         <link rel="stylesheet" type="text/css" href="/assets/styles/index.css">
         <link rel="stylesheet" type="text/css" href="/assets/styles/apps.css">
         <link rel="stylesheet" type="text/css" href="/assets/styles/footer.css">
-        <script type="text/javascript" src="//at.alicdn.com/t/font_1901382_6q46ie6ps2j.js"></script>
+        <script type="text/javascript" src="//at.alicdn.com/t/font_1901382_efi6jl2hyaf.js"></script>
     </head>
 
     <body>
@@ -69,7 +69,7 @@
                     v-bind="dom"
                     @resizing="resize"
                     @dragging="resize"
-                    @close="removeDom(index)"
+                    @close="removeDom(index, dom)"
                     :ref="dom.ref || null"
                     >
                         <iframe v-if="dom.type === 'url'" :src="dom.url" style="width: 100%;height: 100%;border: 0;">
@@ -86,16 +86,14 @@
                     </modal>
                 </div>
                 <footer :class="[dockPosition]" id="AppFooter">
-                    <div id="Docker" class="left" >
-                        <!-- style="width: 70px; margin-left: 0px;" -->
+                    <div id="Docker" :class="[dockPosition]" :style="dockStyle" ref="Docker" @mouseover="dockOver" @mouseleave="dockLeave">
                         <div class="DockItem Finder" :class="[dockPosition]"></div>
                         <div :class="[dockPosition]" class="DockItem Launchpad" @click="openApps"></div>
-                        <!-- openApp('game-puzzle', {bind: {src: 'http://localhost:10241/assets/image/light.jpg'}}) -->
                         <div :class="[dockPosition]" class="DockItem pointer PrefApp" @click="openSetting"></div>
                         <div :class="[dockPosition]" class="DockItem pointer Chrome" @click="browser()"></div>
-                        <div :class="[dockPosition]" class="DockItem Terminal"></div>
-                        <div :class="[dockPosition]" class="DockItem pointer Calculator"></div>
-                        <div :class="[dockPosition]" class="DockItem pointer Drawing"></div>
+                        <!-- <div :class="[dockPosition]" class="DockItem Terminal"></div> -->
+                        <!-- <div :class="[dockPosition]" class="DockItem pointer Calculator"></div>
+                        <div :class="[dockPosition]" class="DockItem pointer Drawing"></div> -->
                     </div>
                 </footer>
             </div>
@@ -146,6 +144,22 @@
               }
             }
         },
+        provide() {
+            return {
+              injectData: {
+                dockPosition: this.dockPosition,
+                dockSize: this.dockSize,
+                dockZoom: this.dockZoom,
+                dockZoomState: this.dockZoomState,
+                dockZoomAroundState: this.dockZoomAroundState,
+                theme: this.theme,
+                showDate: this.showDate,
+                date: this.date,
+                time: this.time,
+                user: this.user,
+              }
+            };
+        },
         data() {
             return {
                 myName: 'osindex',
@@ -153,8 +167,10 @@
                 loaded: false,
                 overMask: false,
                 dockPosition: getCookie('dockPosition', 'left'),
-                dockSize: getCookie('dockSize', 15),
-                dockZoom: getCookie('dockZoom', 25),
+                dockSize: getCookie('dockSize', 60),
+                dockZoomState: getCookie('dockZoomState', 1),
+                dockZoomAroundState: getCookie('dockZoomAroundState', 0),
+                dockZoom: getCookie('dockZoom', 1.5),
                 theme: getCookie('theme', 'light'),
                 showDate: getCookie('showDate', '1'), //
                 date: getCookie('date', 'M月D日 ddd'),
@@ -203,7 +219,6 @@
                 this.body.left = newRect.left;
             },
             animeEx() {
-                console.log('Exxx')
                 anime({
                   targets: ['.blue', '.green'],
                   translateX: '13rem',
@@ -231,8 +246,11 @@
                   this.isBrowser = null
                 }
             },
-            removeDom(index) {
+            removeDom(index, dom) {
                 this.doms.splice(index, 1)
+                if (dom.appIcon) {
+                    this.$refs.Docker.querySelector(dom.appIcon).classList.remove('active')
+                }
             },
             shake(el) {
                 anime({
@@ -266,10 +284,10 @@
                 return this.doms.find(e=>e.ref === name)
             },
             openApp(name, exts = {}) {
-                // {key:'game-puzzle', padding: 1, component:'game-puzzle',w: 600, h: 400,bind: {src: 'http://localhost:10241/assets/image/light.jpg'} }
+                // {ref:'game-puzzle', padding: 1, component:'game-puzzle',w: 600, h: 400,bind: {src: 'http://localhost:10241/assets/image/light.jpg'} }
                 const e = this.uniApp(name)
                 if(e){
-                    this.shake(this.$refs[e.key][0].$el)
+                    this.shake(this.$refs[e.ref][0].$el)
                 }else{
                     this.doms.push({ref: name, w: 600, h: 400, padding: 1, ...exts })
                 }
@@ -283,35 +301,23 @@
                 //     this.$refs['help'][0].setTitle('帮助222222')
                 // }, 3000)
             },
-            openSetting() {
+            openSetting(event) {
                 const exts = {
                     padding: 0,
+                    h: 500,
                     component: 'v-fence',
+                    appIcon: '.PrefApp',
                     on: {
                         emit: (x)=>{
-                            console.log(x.target)
-                            console.log(x.target.value)
                             if (x.target.value) {
-                                switch(x.target.name) {
-                                    // case 'theme':
-                                    //     this.theme = x.target.value
-                                    //     break;
-                                    // case 'date':
-                                    //     this.date = x.target.value
-                                    //     break;
-                                    // case 'time':
-                                    //     this.time = x.target.value
-                                    //     break;
-                                    case 'nickname':
-                                        this.user.nickname = x.target.value
-                                        break;
-                                    case 'email':
-                                        this.user.email = x.target.value
-                                        break;
-                                    default:
-                                        this[x.target.name] = x.target.value
-                                        // debug 
-                                        break;
+                                const kv = x.target.name.split('.')
+                                if (kv.length > 1) {
+                                    this.$set(this[kv[0]],kv[1], x.target.value)
+                                    window.$cookies.set(kv[1], x.target.value)
+                                    // 这个组件需要缓存
+                                }else{
+                                    this[x.target.name] = x.target.value
+                                    window.$cookies.set(kv[0], x.target.value)
                                 }
                             }
                         }
@@ -367,16 +373,16 @@
                                 </div>
                                 <div class="divide"></div>
                                 <div class="options">
-                                    <label class="w200" for="nickname">个人昵称[留言填充]</label>
+                                    <label class="w200" for="nickname">个人昵称[留言自动填充]</label>
                                     <div class="input">
-                                        <input name="nickname" type="text"></input>
+                                        <input class="form-input" name="user.nickname" type="text"></input>
                                     </div>
                                 </div>
                                 <div class="divide"></div>
                                 <div class="options">
-                                    <label class="w200" for="email">个人邮箱[留言填充]</label>
+                                    <label class="w200" for="email">个人邮箱[留言自动填充]</label>
                                     <div class="input">
-                                        <input name="email" type="email"></input>
+                                        <input class="form-input" name="user.email" type="email"></input>
                                     </div>
                                 </div>
                                 `
@@ -393,14 +399,28 @@
                                 <div class="options">
                                 <label for="dockSize">大小</label>
                                     <div class="input">
-                                        <input name="dockSize" type="range" />
+                                        <input name="dockSize" type="range" min="20" max="120" step="1" value="60"/>
                                     </div>
                                 </div>
                                 <div class="divide"></div>
                                 <div class="options">
-                                <label for="dockZoom">放大</label>
+                                <label for="dockZoomState">缩放</label>
                                     <div class="input">
-                                        <input name="dockZoom" type="range" />
+                                        <input name="dockZoomState" type="radio" value="1">启用</input>
+                                        <input name="dockZoomState" type="radio" value="0">停用</input>
+                                    </div>
+                                </div>
+                                <div class="options">
+                                <label for="dockZoom">比例</label>
+                                    <div class="input">
+                                        <input name="dockZoom" type="range" min="0.8" max="1.5" step="0.1" value="1.2"/>
+                                    </div>
+                                </div>
+                                <div class="options">
+                                <label for="dockZoomAroundState">周边缩放</label>
+                                    <div class="input">
+                                        <input name="dockZoomAroundState" type="radio" value="1">启用(实验性能)</input>
+                                        <input name="dockZoomAroundState" type="radio" value="0">停用(性能更好)</input>
                                     </div>
                                 </div>
                                 `
@@ -408,20 +428,8 @@
                         ]
                     }
                 }
+                event.target.classList.add('active')
                 this.openApp('setting', exts)
-                setTimeout(()=>{
-                    // 处理默认值
-                    this.$refs.setting[0].$el.querySelectorAll('input,select').forEach(e=>{
-                         // console.log(e.name, e.type)
-                         if (e.type === 'radio') {
-                            if(this[e.name] === e.value) {
-                                e.setAttribute('checked', true)
-                            }
-                         }else{
-                            e.value = this[e.name] || ''
-                         }
-                    })
-                }, 500)
             },
             openApps() {
                 this.overMask = true
@@ -436,7 +444,56 @@
             },
             beforeClose(event) {
                 console.log(event.params);
-            }
+            },
+            dockOver(event) {
+                // console.log(this.$refs.Docker.children)
+                if(event.target.classList.toString().indexOf('DockItem') === 0 && this.dockZoomState > 0){
+                    const { clientX, clientY, target } = event
+                    const defaultWidth = this.dockSize
+                    // let imgScale = 1
+                    // if (imgScale < 0.5) {
+                    //     imgScale = 0.5;
+                    //   }
+                    // target.width = defaultWidth * 2 * imgScale
+                    // target.style.transform = 'scaleX(1.5)'
+                    const imgList = this.$refs.Docker.children
+                    for (let i = 0; i < imgList.length; i++) {
+                      const img = imgList[i];
+                      const x = img.offsetLeft + defaultWidth / 2 - clientX;
+                      const y =
+                        img.offsetTop +
+                        getOffset(target, this.dockPosition) +
+                        img.offsetHeight / 2 -
+                        clientY;
+                      let imgScale
+                      if (this.dockZoomAroundState > 0) {
+                        imgScale =1 - Math.sqrt(x * x + y * y) / (imgList.length * defaultWidth);
+                        if (imgScale < 0.5 || !imgScale) {
+                          imgScale = 0.5
+                        }
+                        if (target == img) {
+                            imgScale = this.dockZoom
+                        } 
+                      }else{
+                        if (target == img) {
+                          imgScale = this.dockZoom
+                        } else {
+                          imgScale = 0.5
+                        }
+                      }
+                      // console.log(imgScale)
+                      img.style.width = defaultWidth * 2 * imgScale + 'px';
+                      img.style.height = defaultWidth * 2 * imgScale + 'px';
+                    }
+                }
+            },
+            dockLeave() {
+                const imgList = this.$refs.Docker.children
+                for (let i = 0; i < imgList.length; i++) {
+                    imgList[i].style.width = this.dockSize + 'px'
+                    imgList[i].style.height = this.dockSize + 'px'
+                }
+            },
         },
         computed: {
             now() {
@@ -447,7 +504,23 @@
                 return hour > 7 && hour < 18 ? 'light' : 'dark'
             },
             showTheme() {
+                console.log(this.theme)
                 return (this.theme && this.theme != 'auto') ? this.theme : this.currentTimeTheme
+            },
+            dockStyle() {
+                if (this.loaded) {
+                    this.dockLeave()
+                }
+                const zoom = `${parseInt(this.dockSize) + 14}px` // 固定14
+                switch(this.dockPosition) {
+                    case 'left':
+                        return {marginLeft: 0, width: zoom}
+                    break
+                    case 'right':
+                        return {marginRight: 0, width: zoom}
+                    case 'bottom':
+                        return {marginBottom: 0, height: zoom}
+                }
             }
         },
         directives: {
@@ -459,8 +532,6 @@
             }
         },
         created() {
-            this.theme = this.currentTimeTheme
-            // window.$cookies.set("dockPosition","left",-1); 
         },
         mounted() {
             this.loaded = true
