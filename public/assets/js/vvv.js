@@ -1,4 +1,4 @@
-new Vue({
+window.cvue = new Vue({
         el: '#app',
         components: {
             'v-modal': httpVueLoader('/assets/components/modal/index.vue'),
@@ -40,15 +40,28 @@ new Vue({
         },
         data() {
             return {
-                myName: 'osindex',
+            	pointer: [
+    	        	{
+    	        		title: 'osindex',
+    	        		active: false,
+    	        		children: [
+    	        			{
+    	        				title: '你好',
+    	        			},
+    	        			{
+    	        				title: '欢迎来到这里的你',
+    	        			}
+    	        		],
+    	        	},
+    	        ],
                 github: '//github.com/osindex',
                 loaded: false,
                 overMask: false,
                 dockPosition: getCookie('dockPosition', 'left'),
                 dockSize: getCookie('dockSize', 60),
-                dockZoomState: getCookie('dockZoomState', 1),
-                dockZoomAroundState: getCookie('dockZoomAroundState', 0),
-                dockZoom: getCookie('dockZoom', 1.5),
+                dockZoomState: getCookie('dockZoomState', '1'),
+                dockZoomAroundState: getCookie('dockZoomAroundState', '0'),
+                dockZoom: getCookie('dockZoom', '1.5'),
                 theme: getCookie('theme', 'light'),
                 showDate: getCookie('showDate', '1'), //
                 date: getCookie('date', 'M月D日 ddd'),
@@ -401,6 +414,20 @@ new Vue({
                 }
             }
         },
+        watch: {
+        	'user.nickname': function(newValue, oldValue) {
+        		if (newValue != oldValue && newValue == '1') {
+        			this.pointer.push({
+        				title: '管理',
+        				on: {
+        					click: ()=>{
+        						window.location.href = '/admin'
+        					}
+        				}
+        			})
+        		}
+        	}
+        },
         directives: {
             // v-cloak 也需要vue 加载完 使用[css]和指令隐藏特性即可
             style: {
@@ -444,6 +471,16 @@ new Vue({
             // const puzzle = this.loadScript('//unpkg.com/vue-8-puzzle') // 延迟加载
             puzzle.onload = () => {
                  this['game-puzzle'] = true
+            }
+            if (this.user.nickname == 1) {
+            	this.pointer.push({
+        				title: '管理',
+        				on: {
+        					click: ()=>{
+        						window.location.href = '/admin'
+        					}
+        				}
+        			})
             }
         }
     })

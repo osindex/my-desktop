@@ -36,11 +36,29 @@
                 <v-mask v-model="overMask"> </v-mask>
                 <header class="AppFinder" :style="{opacity: overMask?'0':'1'}">
                     <div class="FinderLeft">
-                        <div><svg class="icon-font" aria-hidden="true" style="font-size: 22px;">
+                        <div @click="showHelp">
+                            <svg class="icon-font" aria-hidden="true" style="font-size: 22px;">
                                 <use xlink:href="#icon-osi"></use>
-                            </svg></div>
+                            </svg>
+                        </div>
+                        <div v-for="(item, index) in pointer" :key="index" class="pointer">
+                            <template v-if="item.children && item.children.length">
+                                <span @mouseover="item.active = true"  v-on="item.on" class="text" :class="[item.active?'active':'']" v-cloak>{{item.title}}</span>
+                                <ul @mouseleave="item.active = false" class="menu" :class="[item.active?'active':'']">
+                                    <template v-for="secItem in item.children" :key="secItem.title">
+                                        <li v-on="secItem.on">{{secItem.title}}</li>
+                                        <div class="line"></div>
+                                    </template>
+                                </ul>
+                            </template>
+                            <span v-else v-on="item.on">
+                            {{item.title}}
+                            </span>
+                            
+                        </div>
+                        <!-- 
                         <div class="pointer">
-                            <span class="text " v-cloak>{{myName}}</span>
+                            <span class="text" v-cloak>{{myName}}</span>
                             <ul class="menu">
                                 <li>自定义标题</li>
                                 <div class="line"></div>
@@ -54,7 +72,7 @@
                         <div class="pointer">显示</div>
                         <div class="pointer">前往</div>
                         <div class="pointer">窗口</div>
-                        <div class="pointer" @click="showHelp">帮助</div>
+                        <div class="pointer" @click="showHelp">帮助</div> -->
                     </div>
                     <div class="FinderRight">
                         <div v-cloak v-if="showDate == '1'">{{now}}</div><a :href="github"><svg class="icon-font" aria-hidden="true" style="font-size: 22px;">
@@ -80,10 +98,6 @@
                         <div v-else v-html="dom.html"></div>
                     </vue-drag-resize>
 
-                    <modal name="vmd">
-                        2333
-                        <v-fence> </v-fence>
-                    </modal>
                 </div>
                 <footer :class="[dockPosition]" id="AppFooter">
                     <div id="Docker" :class="[dockPosition]" :style="dockStyle" ref="Docker" @mouseover="dockOver" @mouseleave="dockLeave">
@@ -99,6 +113,7 @@
             </div>
         </div>
     </body>
+
     <script src="//cdn.jsdelivr.net/npm/vue"></script>
     <script src="//cdn.jsdelivr.net/npm/vue-cookies"></script>
     <script src="//cdn.jsdelivr.net/npm/http-vue-loader"></script>
@@ -120,7 +135,9 @@
     <script type="text/javascript">
     dayjs.locale('zh-cn')
     Vue.use(window["vue-js-modal"].default)
-    // Vue.use(window["vue-js-modal"].default, { dialog: true })
+    
+    // 此处预留 page页面
+    console.log(window.cvue.pointer.push({title: '文件', active: false}))
     </script>
 
 </html>
