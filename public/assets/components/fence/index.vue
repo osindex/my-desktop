@@ -13,29 +13,65 @@ module.exports = {
 					{title: '设置', icon: 'icon', list: []}
 				]
 			}
-		}
+		},
 	},
+	inject: {tempData: 'injectData'},
 	data() {
 		return {
 			active: 0,
-			list: this.tree[0].list
+			list: this.tree[0].list,
+			params: this.tempData
 		}
 	},
 	methods: {
 		activeList(item, index) {
 			this.active = index
 			this.list = item.list
+			this.updateValue()
 		},
-		emit(e) {
-			this.$emit('emit', e)
+		emit(x) {
+			if (x.target.value) {
+			    const kv = x.target.name.split('.')
+			    if (kv.length > 1) {
+			        this.$set(this.params[kv[0]],kv[1], x.target.value)
+			    }else{
+			        this.params[x.target.name] = x.target.value
+			    }
+			}
+			this.$emit('emit', x)
+		},
+		clickEmit(e) {
+			this.$emit('clickEmit', e)
+		},
+		updateValue () {
+			setTimeout(()=>{
+				this.$refs.split.querySelectorAll('input,select').forEach(e=>{
+			    		const kv = e.name.split('.')
+			    		let tv
+					    if (kv.length > 1) {
+					    	tv = this.params[kv[0]][kv[1]]
+						}else{
+					    	tv = this.params[kv[0]]
+						}
+						if (e.type === 'radio') {
+							if(tv === e.value) {
+							    e.setAttribute('checked', true)
+							}
+						}else{
+							e.value = tv || ''
+						}
+				})
+			}, 500)
 		}
 	},
 	mounted() {
+		// 处理默认值
+	    this.updateValue()
 	}
 }
 </script>
 <template>
-	<div class="split">
+	<div class="split" ref="split">
 		<div class="leftSet">
 			<div v-for="(item, index) in tree" :key="item.title" :class="['leftTitle',active === index?'active':'']" @click="activeList(item, index)">
 	            <svg v-if="item.icon" class="icon-font" aria-hidden="true" style="font-size: 22px;">
@@ -47,12 +83,12 @@ module.exports = {
         	</div>
 		</div>
 		<div class="rightSet">
-			<div v-if="typeof list === 'string'" v-html="list" @change="emit"></div>
+			<div v-if="typeof list === 'string'" v-html="list" @change="emit" @click="clickEmit"></div>
 			<div v-else>
 				<component v-bind="list.bind" :is="list.component">
 				</component>
 			</div>
-			<slot>
+			<!-- <slot>
 				<span class="rightTitle">
 				  设置
 				</span>
@@ -68,7 +104,7 @@ module.exports = {
 				    <radio>右</radio>
 				    <span>Dock 所在屏幕位置</span>
 				</div>
-			</slot>
+			</slot> -->
 		</div>
 	</div>
 </template>

@@ -26,7 +26,7 @@
         <link rel="stylesheet" type="text/css" href="/assets/styles/index.css">
         <link rel="stylesheet" type="text/css" href="/assets/styles/apps.css">
         <link rel="stylesheet" type="text/css" href="/assets/styles/footer.css">
-        <script type="text/javascript" src="//at.alicdn.com/t/font_1901382_6q46ie6ps2j.js"></script>
+        <script type="text/javascript" src="//at.alicdn.com/t/font_1901382_efi6jl2hyaf.js"></script>
     </head>
 
     <body>
@@ -36,11 +36,29 @@
                 <v-mask v-model="overMask"> </v-mask>
                 <header class="AppFinder" :style="{opacity: overMask?'0':'1'}">
                     <div class="FinderLeft">
-                        <div><svg class="icon-font" aria-hidden="true" style="font-size: 22px;">
+                        <div @click="showHelp">
+                            <svg class="icon-font" aria-hidden="true" style="font-size: 22px;">
                                 <use xlink:href="#icon-osi"></use>
-                            </svg></div>
+                            </svg>
+                        </div>
+                        <div v-for="(item, index) in pointer" :key="index" class="pointer">
+                            <template v-if="item.children && item.children.length">
+                                <span @mouseover="item.active = true"  v-on="item.on" class="text" :class="[item.active?'active':'']" v-cloak>{{item.title}}</span>
+                                <ul @mouseleave="item.active = false" class="menu" :class="[item.active?'active':'']">
+                                    <template v-for="secItem in item.children" :key="secItem.title">
+                                        <li v-on="secItem.on">{{secItem.title}}</li>
+                                        <div class="line"></div>
+                                    </template>
+                                </ul>
+                            </template>
+                            <span v-else v-on="item.on">
+                            {{item.title}}
+                            </span>
+                            
+                        </div>
+                        <!-- 
                         <div class="pointer">
-                            <span class="text " v-cloak>{{myName}}</span>
+                            <span class="text" v-cloak>{{myName}}</span>
                             <ul class="menu">
                                 <li>自定义标题</li>
                                 <div class="line"></div>
@@ -54,7 +72,7 @@
                         <div class="pointer">显示</div>
                         <div class="pointer">前往</div>
                         <div class="pointer">窗口</div>
-                        <div class="pointer" @click="showHelp">帮助</div>
+                        <div class="pointer" @click="showHelp">帮助</div> -->
                     </div>
                     <div class="FinderRight">
                         <div v-cloak v-if="showDate == '1'">{{now}}</div><a :href="github"><svg class="icon-font" aria-hidden="true" style="font-size: 22px;">
@@ -69,7 +87,7 @@
                     v-bind="dom"
                     @resizing="resize"
                     @dragging="resize"
-                    @close="removeDom(index)"
+                    @close="removeDom(index, dom)"
                     :ref="dom.ref || null"
                     >
                         <iframe v-if="dom.type === 'url'" :src="dom.url" style="width: 100%;height: 100%;border: 0;">
@@ -80,27 +98,22 @@
                         <div v-else v-html="dom.html"></div>
                     </vue-drag-resize>
 
-                    <modal name="vmd">
-                        2333
-                        <v-fence> </v-fence>
-                    </modal>
                 </div>
                 <footer :class="[dockPosition]" id="AppFooter">
-                    <div id="Docker" class="left" >
-                        <!-- style="width: 70px; margin-left: 0px;" -->
+                    <div id="Docker" :class="[dockPosition]" :style="dockStyle" ref="Docker" @mouseover="dockOver" @mouseleave="dockLeave">
                         <div class="DockItem Finder" :class="[dockPosition]"></div>
                         <div :class="[dockPosition]" class="DockItem Launchpad" @click="openApps"></div>
-                        <!-- openApp('game-puzzle', {bind: {src: 'http://localhost:10241/assets/image/light.jpg'}}) -->
                         <div :class="[dockPosition]" class="DockItem pointer PrefApp" @click="openSetting"></div>
                         <div :class="[dockPosition]" class="DockItem pointer Chrome" @click="browser()"></div>
-                        <div :class="[dockPosition]" class="DockItem Terminal"></div>
-                        <div :class="[dockPosition]" class="DockItem pointer Calculator"></div>
-                        <div :class="[dockPosition]" class="DockItem pointer Drawing"></div>
+                        <!-- <div :class="[dockPosition]" class="DockItem Terminal"></div> -->
+                        <!-- <div :class="[dockPosition]" class="DockItem pointer Calculator"></div>
+                        <div :class="[dockPosition]" class="DockItem pointer Drawing"></div> -->
                     </div>
                 </footer>
             </div>
         </div>
     </body>
+
     <script src="//cdn.jsdelivr.net/npm/vue"></script>
     <script src="//cdn.jsdelivr.net/npm/vue-cookies"></script>
     <script src="//cdn.jsdelivr.net/npm/http-vue-loader"></script>
@@ -118,386 +131,13 @@
 
     <script src="/assets/js/anime.js"></script>
     <script src="/assets/js/utils.js"></script>
+    <script src="/assets/js/vvv.js"></script>
     <script type="text/javascript">
     dayjs.locale('zh-cn')
     Vue.use(window["vue-js-modal"].default)
-    // Vue.use(window["vue-js-modal"].default, { dialog: true })
-    new Vue({
-        el: '#app',
-        components: {
-            'v-modal': httpVueLoader('/assets/components/modal/index.vue'),
-            'vue-drag-resize': httpVueLoader('/assets/components/drag/index.vue'),
-            'osi-svg': httpVueLoader('/assets/components/svg/osi.vue'),
-            'v-mask': httpVueLoader('/assets/components/mask/index.vue'),
-            'v-fence': httpVueLoader('/assets/components/fence/index.vue'),
-            'game-puzzle': httpVueLoader('/assets/components/games/puzzle.vue'),
-            'anchored-heading': {
-              render: function (createElement) {
-                return createElement(
-                  'h' + this.level,   // 标签名称
-                  this.$slots.default // 子节点数组
-                )
-              },
-              props: {
-                level: {
-                  type: Number,
-                  required: true
-                }
-              }
-            }
-        },
-        data() {
-            return {
-                myName: 'osindex',
-                github: '//github.com/osindex',
-                loaded: false,
-                overMask: false,
-                dockPosition: getCookie('dockPosition', 'left'),
-                dockSize: getCookie('dockSize', 15),
-                dockZoom: getCookie('dockZoom', 25),
-                theme: getCookie('theme', 'light'),
-                showDate: getCookie('showDate', '1'), //
-                date: getCookie('date', 'M月D日 ddd'),
-                time: getCookie('time', 'HH:mm'),
-                user: {
-                    nickname: getCookie('nickname'),
-                    email: getCookie('email'),
-                },
-                animeTarget: {},
-                // tl - Top left
-                // tm - Top middle
-                // tr - Top right
-                // mr - Middle right
-                // br - Bottom right
-                // bm - Bottom middle
-                // bl - Bottom left
-                // ml - Middle left
-                body: {
-                    width: 100,
-                    height: 100,
-                    top: 100,
-                    left: 100
-                },
-                currentDate: dayjs(),
-                doms: [],
-                iframeActive: false,
-                iframeUrl: null,
-                isBrowser: null,
-                'game-puzzle': false
-            }
-        },
-        methods: {
-            loadScript(src) {
-                let scriptEle = document.createElement('script')
-                scriptEle.src = src
-                document.body.appendChild(scriptEle)
-                // scriptEle.onload = () => {
-                //  this.load = true
-                // }
-                return scriptEle
-            },
-            resize(newRect) {
-                this.body.width = newRect.width;
-                this.body.height = newRect.height;
-                this.body.top = newRect.top;
-                this.body.left = newRect.left;
-            },
-            animeEx() {
-                console.log('Exxx')
-                anime({
-                  targets: ['.blue', '.green'],
-                  translateX: '13rem',
-                  easing: 'easeOutCirc',
-                  rotate: 180,
-                  borderRadius: 8,
-                  duration: 2000,
-                  loop: true
-                });
-            },
-            iframe(url = "http://www.baidu.com/") {
-                this.iframeUrl = url
-                this.iframeActive = true
-            },
-            browser(url = "http://www.baidu.com/") {
-                // 外部浏览器
-                if (!this.isBrowser) {
-                    this.isBrowser = window.open(
-                        url,
-                        "",
-                        "width=1000,height=600,left=500,top=300,menubar=no,toolbar=no,status=no,scrollbars=yes"
-                      )
-                } else {
-                  this.isBrowser.close()
-                  this.isBrowser = null
-                }
-            },
-            removeDom(index) {
-                this.doms.splice(index, 1)
-            },
-            shake(el) {
-                anime({
-                    targets: el,
-                    scale: 1,
-                    rotate: [
-                        {
-                            value: -5,
-                            duration: 50,
-                            easing: 'easeInOutBounce'
-                        },
-                        {
-                            value: 5,
-                            duration: 50,
-                            easing: 'easeInOutBounce'
-                        },
-                        {
-                            value: 0,
-                            duration: 25,
-                            easing: 'easeInOutBounce'
-                        }
-                    ],
-                    // loop: 2, //间隔时间太长 
-                    // loopComplete: function(anim) {
-                    //     console.log(anim)
-                    //     // anime.remove(el) 移除无效
-                    // }
-                });
-            },
-            uniApp(name) {
-                return this.doms.find(e=>e.ref === name)
-            },
-            openApp(name, exts = {}) {
-                // {key:'game-puzzle', padding: 1, component:'game-puzzle',w: 600, h: 400,bind: {src: 'http://localhost:10241/assets/image/light.jpg'} }
-                const e = this.uniApp(name)
-                if(e){
-                    this.shake(this.$refs[e.key][0].$el)
-                }else{
-                    this.doms.push({ref: name, w: 600, h: 400, padding: 1, ...exts })
-                }
-            },
-            showHelp() {
-                const params = {title: '帮助', component:'osi-svg',html:`<p>YoungFan</p><p>copyright@2020</p>`}
-                this.openApp('help', params)
-                // setTimeout(()=>{
-                //     // params.title = '帮助222222'
-                //     console.log(this.$refs['help'][0])
-                //     this.$refs['help'][0].setTitle('帮助222222')
-                // }, 3000)
-            },
-            openSetting() {
-                const exts = {
-                    padding: 0,
-                    component: 'v-fence',
-                    on: {
-                        emit: (x)=>{
-                            console.log(x.target)
-                            console.log(x.target.value)
-                            if (x.target.value) {
-                                switch(x.target.name) {
-                                    // case 'theme':
-                                    //     this.theme = x.target.value
-                                    //     break;
-                                    // case 'date':
-                                    //     this.date = x.target.value
-                                    //     break;
-                                    // case 'time':
-                                    //     this.time = x.target.value
-                                    //     break;
-                                    case 'nickname':
-                                        this.user.nickname = x.target.value
-                                        break;
-                                    case 'email':
-                                        this.user.email = x.target.value
-                                        break;
-                                    default:
-                                        this[x.target.name] = x.target.value
-                                        // debug 
-                                        break;
-                                }
-                            }
-                        }
-                    },
-                    bind: {
-                        tree:[
-                            {title: '设置', icon: 'icon-macbook', list: `
-                                <div class="options">
-                                <label class="w200" for="theme">主题</label>
-                                    <div class="input">
-                                        <input name="theme" type="radio" value="light">浅色</input>
-                                        <input name="theme" type="radio" value="dark">深色</input>
-                                        <input name="theme" type="radio" value="auto">自动</input>
-                                    </div>
-                                </div>
-                                <div class="divide"></div>
-                                <div class="options">
-                                    <label class="w200" for="showDate">在菜单栏中显示日期时间</label>
-                                    <div class="input">
-                                        <input name="showDate" type="radio" value="1">是</input>
-                                        <input name="showDate" type="radio" value="0">否</input>
-                                    </div>
-                                </div>
-                                <div class="divide"></div>
-                                <div class="options">
-                                    <label class="w200" for="date">日期格式</label>
-                                    <div class="input">
-                                        <select name="date">
-                                            <option value="YYYY年MM月DD日">----年--月--日</option>
-                                            <option value="YYYY年MM月DD日 ddd">----年--月--日 周-</option>
-                                            <option value="YYYY年MM月DD日 dddd">----年--月--日 星期-</option>
-                                            <option value="MM月DD日">--月--日</option>
-                                            <option value="MM月DD日 ddd">--月--日 周-</option>
-                                            <option value="MM月DD日 dddd">--月--日 星期-</option>
-                                            <option value="M月D日">-月-日</option>
-                                            <option value="M月D日 ddd">-月-日 周-</option>
-                                            <option value="M月D日 dddd">-月-日 星期-</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="divide"></div>
-                                <div class="options">
-                                    <label class="w200" for="time">时间格式</label>
-                                    <div class="input">
-                                        <select name="time">
-                                            <option value="HH:mm">--:--</option>
-                                            <option value="H:mm">-:--</option>
-                                            <option value="A H:mm">上午 -:--</option>
-                                            <option value="HH:mm:ss">--:--:--</option>
-                                            <option value="A HH:mm:ss">下午 --:--:--</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div class="divide"></div>
-                                <div class="options">
-                                    <label class="w200" for="nickname">个人昵称[留言填充]</label>
-                                    <div class="input">
-                                        <input name="nickname" type="text"></input>
-                                    </div>
-                                </div>
-                                <div class="divide"></div>
-                                <div class="options">
-                                    <label class="w200" for="email">个人邮箱[留言填充]</label>
-                                    <div class="input">
-                                        <input name="email" type="email"></input>
-                                    </div>
-                                </div>
-                                `
-                            },
-                            {title: 'Dock设置', icon: 'icon-ios-cog', list: `<div class="options">
-                                <label for="dockPosition">位置</label>
-                                    <div class="input">
-                                        <input name="dockPosition" type="radio" value="left">左</input>
-                                        <input name="dockPosition" type="radio" value="bottom">下</input>
-                                        <input name="dockPosition" type="radio" value="right">右</input>
-                                    </div>
-                                </div>
-                                <div class="divide"></div>
-                                <div class="options">
-                                <label for="dockSize">大小</label>
-                                    <div class="input">
-                                        <input name="dockSize" type="range" />
-                                    </div>
-                                </div>
-                                <div class="divide"></div>
-                                <div class="options">
-                                <label for="dockZoom">放大</label>
-                                    <div class="input">
-                                        <input name="dockZoom" type="range" />
-                                    </div>
-                                </div>
-                                `
-                            }
-                        ]
-                    }
-                }
-                this.openApp('setting', exts)
-                setTimeout(()=>{
-                    // 处理默认值
-                    this.$refs.setting[0].$el.querySelectorAll('input,select').forEach(e=>{
-                         // console.log(e.name, e.type)
-                         if (e.type === 'radio') {
-                            if(this[e.name] === e.value) {
-                                e.setAttribute('checked', true)
-                            }
-                         }else{
-                            e.value = this[e.name] || ''
-                         }
-                    })
-                }, 500)
-            },
-            openApps() {
-                this.overMask = true
-                console.log(this.overMask)
-                // const e = this.doms.find(e=>e.ref === 'apps')
-                // if(e){
-                //     this.shake(this.$refs[e.ref][0].$el)
-                // }else{
-                //     this.doms.push({ref:'apps', padding: 1, component:'osi-svg',html:`<p>YoungFan</p><p>copyright@2020</p>`,w: 600, h: 400})
-                //     // this.doms.push({ref:'help',padding: 1,html:'<h2>内容呢？</h2><p>一段话</p>'})
-                // }
-            },
-            beforeClose(event) {
-                console.log(event.params);
-            }
-        },
-        computed: {
-            now() {
-                return this.currentDate.format(`${this.date} ${this.time}`.replace('  ',' '))
-            },
-            currentTimeTheme() {
-                const hour = (new Date()).getHours()
-                return hour > 7 && hour < 18 ? 'light' : 'dark'
-            },
-            showTheme() {
-                return (this.theme && this.theme != 'auto') ? this.theme : this.currentTimeTheme
-            }
-        },
-        directives: {
-            // v-cloak 也需要vue 加载完 使用[css]和指令隐藏特性即可
-            style: {
-                inserted: (el) => {
-                    el.removeAttribute('style')
-                }
-            }
-        },
-        created() {
-            this.theme = this.currentTimeTheme
-            // window.$cookies.set("dockPosition","left",-1); 
-        },
-        mounted() {
-            this.loaded = true
-            // this.$refs['vmd'].show()
-            // this.$nextTick(()=>{
-            //     this.$modal.show('vmd', { draggable: true, foo: 'bar' })
-            // })
-            //     // this.$refs['vmd'].show()
-            // })
-            // this.$modal.show('dialog', {
-            //   title: 'Alert!',
-            //   text: 'You are too awesome',
-            //   buttons: [
-            //     {
-            //       title: 'Deal with it',
-            //       handler: () => { alert('Woot!') }
-            //     },
-            //     {
-            //       title: '',       // Button title
-            //       default: true,    // Will be triggered by default if 'Enter' pressed.
-            //       handler: () => {} // Button click handler
-            //     },
-            //     {
-            //       title: 'Close'
-            //     }
-            //  ]
-            // })
-            window.setInterval(() => {
-              this.currentDate = this.currentDate.add(1, 's')
-            }, 1000)
-            const puzzle = this.loadScript('//cdn.jsdelivr.net/npm/vue-8-puzzle') // 延迟加载
-            // const puzzle = this.loadScript('//unpkg.com/vue-8-puzzle') // 延迟加载
-            puzzle.onload = () => {
-                 this['game-puzzle'] = true
-            }
-        }
-    })
+    
+    // 此处预留 page页面
+    console.log(window.cvue.pointer.push({title: '文件', active: false}))
     </script>
 
 </html>
